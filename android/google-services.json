@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "896481206806",
+    "project_id": "sms-https-a19cb",
+    "storage_bucket": "sms-https-a19cb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896481206806:android:b7a75300226192f943cb37",
+        "android_client_info": {
+          "package_name": "com.tripleadelnorte.httpsms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdIT8b1kZpGz7Qt0acMjyWUBZOfjrhwSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
