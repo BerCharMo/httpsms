@@ -1,6 +1,9 @@
 services:
   postgres:
-    image: postgres:alpine
+    # Pinned to a major on purpose: postgres:alpine now resolves to 18+, which
+    # relocated its data directory and no longer accepts a mount at
+    # /var/lib/postgresql/data. Unpinned tags also make the build irreproducible.
+    image: postgres:17-alpine
     environment:
       POSTGRES_DB: httpsms
       POSTGRES_PASSWORD: dbpassword
@@ -18,7 +21,7 @@ services:
       start_period: 5s
 
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     command: redis-server
     volumes:
       - redis:/var/lib/redis
