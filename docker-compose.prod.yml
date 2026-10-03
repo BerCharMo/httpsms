@@ -22,11 +22,11 @@ services:
     # Bound to loopback, not 0.0.0.0. Host nginx proxies to it over
     # 127.0.0.1 so it stays unreachable from the internet, while still being
     # reachable by the reverse proxy running on the host.
-    ports:
+    ports: !reset
       - "127.0.0.1:8000:8000"
 
   web:
     restart: unless-stopped
     # Same reasoning as api: loopback only, fronted by host nginx.
-    ports:
+    ports: !reset
       - "127.0.0.1:3000:3000"
