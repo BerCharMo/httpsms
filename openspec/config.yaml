@@ -1,0 +1,106 @@
+schema: spec-driven
+
+project: httpsms
+
+context: |
+  Monorepo: api/ (Go 1.26 backend, Fiber v3, layered Handlers->Services->Repositories),
+  web/ (Nuxt 4 + Vue 3 + Vuetify 4 + Pinia 3 static SPA), android/ (Kotlin app, 30 files),
+  tests/ (separate Go module for HTTP integration/E2E against docker compose).
+  Data: GORM v2 + PostgreSQL driver primary (AutoMigrate, no migration files), MongoDB optional
+  for contact/heartbeat backends, Redis cache+events, CockroachDB in test stack.
+  Auth: Firebase Admin SDK (Go) verifies ID tokens; Firebase Web SDK handles login in web/.
+  Push: Firebase Cloud Messaging via firebase.google.com/go/messaging + HTTP notification transport.
+  Events: CloudEvents SDK, dispatched synchronously or via Google Cloud Tasks.
+  Errors: github.com/NdoleStudio/stacktrace. Format: go-fumpt.
+  Resolved 2026-10-02: PostgreSQL is already the primary datastore (Firebase was never a
+  store here), and cloudflared has no surface in this repo. Firebase Auth + FCM are retained
+  as shipped. The drop-firebase change was cancelled after exploration and is kept under
+  changes/drop-firebase/ as a decision record only. VPS deployment is deferred.
+
+strict_tdd: true
+
+testing:
+  detected: 2026-10-02
+  test_command: cd api && go test ./...
+  integration_test_command: cd tests && docker compose up -d --build && go test -v -timeout 300s ./...
+  lint_command: pre-commit run --all-files
+  build_command: cd api && go build ./...
+  strict_tdd: true
+  runners:
+    unit:
+      command: cd api && go test ./...
+      framework: Go stdlib testing + stretchr/testify
+      available: true
+    unit_integration_tagged:
+      command: cd api && go test -tags integration -timeout 60s ./pkg/handlers
+      framework: Go stdlib testing + testify + docker compose services
+      available: true
+    integration_e2e:
+      command: cd tests && go test -v -timeout 300s ./...
+      framework: go-wiremock + testify against live docker stack
+      available: true
+    web:
+      command: cd web && pnpm test
+      framework: none (script is `echo 'No tests configured yet'`)
+      available: false
+    android:
+      command: cd android && ./gradlew test
+      framework: JUnit (only ExampleUnitTest/ExampleInstrumentedTest stubs)
+      available: false
+  coverage:
+    available: true
+    command: cd api && go test -cover ./...
+  quality_tools:
+    linter: go-lint (golint, pre-commit), eslint, stylelint, lint-staged
+    golangci_lint: false
+    type_checker: tsc via typescript devDependency (no dedicated script)
+    formatter: go-fumpt (pre-commit), prettier
+  known_gaps:
+    - CI (.github/workflows/api.yml) does not run `go test ./...` on api/; it only runs
+      the -tags integration handler suite plus the separate tests/ module. ~208 unit test
+      funcs in api/pkg/** are therefore unexecuted in CI.
+    - CI (.github/workflows/web.yml) runs `pnpm test`, which is a no-op echo.
+    - No local Go toolchain installed on the init host; commands are taken from CI config, not executed.
+
+rules:
+  proposal:
+    - Scope changes to one coherent outcome; state explicit non-goals.
+    - For Firebase or Cloudflare removals, include a rollback plan and a data-migration plan
+      (Firebase Auth UID -> local user id is a breaking identity change).
+    - Flag the 400-line review budget: split into chained PRs sized under it.
+  specs:
+    - Use Given/When/Then for scenarios.
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+    - Treat any change to Firebase Auth token verification or FCM delivery as a behavior
+      contract change requiring explicit scenarios.
+  design:
+    - Include sequence diagrams for complex flows.
+    - Document architecture decisions with rationale, especially data-store swaps.
+    - Name the PostgreSQL/CockroachDB/MongoDB split explicitly for every touched entity.
+  tasks:
+    - Group by phase, use hierarchical numbering.
+    - Keep tasks completable in one session and under the 400-line review budget.
+    - Each task that touches behavior MUST land with its test in the same task.
+  apply:
+    - Follow existing code patterns: DI container lazy singletons in api/pkg/di/container.go,
+      repository interface + `gorm*` implementation pairs, `stacktrace.Propagate` for errors.
+    - GORM only for queries, always with `db.WithContext(ctx)`. No raw SQL.
+    - tdd: true
+    - test_command: cd api && go test ./...
+  verify:
+    - test_command: cd api && go test ./...
+    - integration_test_command: cd tests && docker compose up -d --build && go test -v -timeout 300s ./...
+    - build_command: cd api && go build ./...
+    - lint_command: pre-commit run --all-files
+    - web_build_command: cd web && pnpm lint && pnpm run generate
+    - coverage_threshold: 0
+    - Report explicitly when a layer is unavailable (web unit tests, android tests).
+  archive:
+    - Warn before merging destructive deltas.
+    - Record which Firebase/Cloudflare touchpoints were retired and which were intentionally kept.
+
+session:
+  execution_mode: interactive
+  artifact_store: openspec
+  delivery_strategy: ask-always
+  review_budget_lines: 400

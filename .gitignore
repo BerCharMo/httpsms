@@ -16,6 +16,7 @@ SECURITY_AUDIT_REPORT.md
 
 .output
 .agents/
+.atl/
 skills-lock.json
 .worktrees/
 docs/superpowers
