@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'android/**'
-  workflow_dispatch:  # permite lanzarlo a mano desde la web
+  workflow_dispatch:
 
 jobs:
   build:
@@ -35,6 +35,12 @@ jobs:
             ~/.gradle/wrapper
             android/gradle/wrapper
           key: gradle-wrapper-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Write google-services.json from secret
+        if: env.GOOGLE_SERVICES_JSON != ''
+        working-directory: android
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > app/google-services.json
 
       - name: Build Debug APK
         working-directory: android
