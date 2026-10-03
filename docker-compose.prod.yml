@@ -19,11 +19,14 @@ services:
 
   api:
     restart: unless-stopped
-    # Reached through nginx only. The Android app and the dashboard both call
-    # it via sms.tripleadelnorte.com.
-    ports: !reset []
+    # Bound to loopback, not 0.0.0.0. Host nginx proxies to it over
+    # 127.0.0.1 so it stays unreachable from the internet, while still being
+    # reachable by the reverse proxy running on the host.
+    ports:
+      - "127.0.0.1:8000:8000"
 
   web:
     restart: unless-stopped
-    # Reached through nginx only.
-    ports: !reset []
+    # Same reasoning as api: loopback only, fronted by host nginx.
+    ports:
+      - "127.0.0.1:3000:3000"
