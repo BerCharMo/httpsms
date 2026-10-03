@@ -1,0 +1,29 @@
+# Production overlay for a single-host deployment behind nginx.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# The base compose file is development-shaped: it publishes Postgres and Redis
+# on 0.0.0.0 so they can be reached from the host. On a public-IP VPS that
+# exposes the database to the internet, so the published ports are reset here
+# and the services talk over the compose network instead. Nothing is reachable
+# from outside except nginx.
+
+services:
+  postgres:
+    # Base file maps 5435:5432 on all interfaces. Reset removes it entirely.
+    ports: !reset []
+
+  redis:
+    # Same reason as postgres.
+    ports: !reset []
+
+  api:
+    restart: unless-stopped
+    # Reached through nginx only. The Android app and the dashboard both call
+    # it via sms.tripleadelnorte.com.
+    ports: !reset []
+
+  web:
+    restart: unless-stopped
+    # Reached through nginx only.
+    ports: !reset []

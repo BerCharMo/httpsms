@@ -5,9 +5,12 @@ services:
     # /var/lib/postgresql/data. Unpinned tags also make the build irreproducible.
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: httpsms
-      POSTGRES_PASSWORD: dbpassword
-      POSTGRES_USER: dbusername
+      POSTGRES_DB: ${POSTGRES_DB:-httpsms}
+      # No default on purpose. A checked-in database password is a leaked
+      # database password, and this file is tracked in a public repository.
+      # Generate one into a root .env (gitignored) and let compose interpolate.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in the root .env}
+      POSTGRES_USER: ${POSTGRES_USER:-httpsms}
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
