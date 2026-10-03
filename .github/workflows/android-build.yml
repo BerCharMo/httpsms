@@ -24,7 +24,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools,platforms;android-34,build-tools;34.0.0,ndk;26.1.10909125
+          packages: |
+            platform-tools
+            platforms;android-34
+            build-tools;34.0.0
+            ndk;26.1.10909125
           cmdline-tools-version: 'latest'
 
       - name: Cache Gradle wrapper
