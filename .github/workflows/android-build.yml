@@ -24,7 +24,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          # v3 usa 'packages' en vez de api-level/ndk-version
           packages: platform-tools,platforms;android-34,build-tools;34.0.0,ndk;26.1.10909125
           cmdline-tools-version: 'latest'
 
@@ -41,6 +40,13 @@ jobs:
         working-directory: android
         run: |
           echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > app/google-services.json
+
+      - name: Debug environment
+        working-directory: android
+        run: |
+          ls -la
+          cat gradle/wrapper/gradle-wrapper.properties
+          ./gradlew --version
 
       - name: Build Debug APK
         working-directory: android
