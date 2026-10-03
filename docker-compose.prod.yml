@@ -2,11 +2,11 @@
 #
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# The base compose file is development-shaped: it publishes Postgres and Redis
-# on 0.0.0.0 so they can be reached from the host. On a public-IP VPS that
-# exposes the database to the internet, so the published ports are reset here
-# and the services talk over the compose network instead. Nothing is reachable
-# from outside except nginx.
+# The base compose file publishes Postgres and Redis on 0.0.0.0 so they can
+# be reached from the host. On a public-IP VPS that exposes the database to
+# the internet, so the published ports are reset here and the services talk
+# over the compose network instead. Nothing is reachable from outside except
+# nginx.
 
 services:
   postgres:
@@ -19,14 +19,6 @@ services:
 
   api:
     restart: unless-stopped
-    # Bound to loopback, not 0.0.0.0. Host nginx proxies to it over
-    # 127.0.0.1 so it stays unreachable from the internet, while still being
-    # reachable by the reverse proxy running on the host.
-    ports: !reset
-      - "127.0.0.1:8000:8000"
 
   web:
     restart: unless-stopped
-    # Same reasoning as api: loopback only, fronted by host nginx.
-    ports: !reset
-      - "127.0.0.1:3000:3000"
