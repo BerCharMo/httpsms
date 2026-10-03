@@ -1,3 +1,13 @@
+# This directory is not a monorepo, but the presence of a pnpm-workspace.yaml
+# makes pnpm treat it as a workspace root and then require a non-empty
+# `packages` field. Declaring the root itself keeps the file valid without
+# pulling in any other package.
+packages:
+  - .
+
+# Lifecycle-script allow-list. pnpm 10 spells this `onlyBuiltDependencies`;
+# pnpm 11 renamed it to `allowBuilds`. pnpm 9 ignores both, so keeping the
+# newer name is harmless today and correct once the image moves to 10/11.
 allowBuilds:
   '@firebase/util': true
   '@parcel/watcher': true
